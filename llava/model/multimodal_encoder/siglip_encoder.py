@@ -26,7 +26,7 @@ from transformers.image_utils import (
 from transformers.activations import ACT2FN
 from transformers.modeling_outputs import BaseModelOutput, BaseModelOutputWithPooling
 from transformers.modeling_utils import PreTrainedModel
-from transformers import PretrainedConfig
+from transformers import AutoProcessor, PretrainedConfig
 from transformers.utils import ModelOutput
 from llava.utils import rank0_print
 
@@ -544,8 +544,14 @@ class SigLipVisionTower(nn.Module):
         self.config = SigLipVisionConfig()
 
         self.vision_tower_name = vision_tower
+        self.vision_tower_cfg = vision_tower_cfg
 
-        self.image_processor = SigLipImageProcessor()
+        processor_path = getattr(vision_tower_cfg, "vision_tower_processor", None)
+        if processor_path:
+            processor = AutoProcessor.from_pretrained(processor_path)
+            self.image_processor = getattr(processor, "image_processor", processor)
+        else:
+            self.image_processor = SigLipImageProcessor()
 
         if not delay_load:
             rank0_print(f"Loading vision tower: {vision_tower}")
