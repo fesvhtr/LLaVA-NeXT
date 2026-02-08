@@ -79,6 +79,7 @@ class ModelArguments:
     tune_mm_vision_resampler: bool = field(default=False)
     vision_tower: Optional[str] = field(default=None)
     vision_tower_pretrained: Optional[str] = field(default=None)  # default to the last layer
+    vision_tower_processor: Optional[str] = field(default=None, metadata={"help": "Optional path/name for a separate image processor."})
 
     unfreeze_mm_vision_tower: bool = field(default=False)
     unfreeze_language_model: bool = field(default=False)

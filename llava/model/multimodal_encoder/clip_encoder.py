@@ -15,6 +15,7 @@ class CLIPVisionTower(nn.Module):
 
         self.is_loaded = False
 
+        self.args = args
         self.vision_tower_name = vision_tower
         self.select_layer = args.mm_vision_select_layer
         self.select_feature = getattr(args, "mm_vision_select_feature", "patch")
@@ -37,7 +38,11 @@ class CLIPVisionTower(nn.Module):
             rank0_print("{} is already loaded, `load_model` called again, skipping.".format(self.vision_tower_name))
             return
 
-        self.image_processor = CLIPImageProcessor.from_pretrained(self.vision_tower_name)
+        processor_path = getattr(self.args, "vision_tower_processor", None)
+        if processor_path:
+            self.image_processor = CLIPImageProcessor.from_pretrained(processor_path)
+        else:
+            self.image_processor = CLIPImageProcessor.from_pretrained(self.vision_tower_name)
         self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map)
         self.vision_tower.requires_grad_(False)
 

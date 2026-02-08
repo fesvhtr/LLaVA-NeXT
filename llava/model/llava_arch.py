@@ -60,6 +60,7 @@ class LlavaMetaModel:
 
         self.config.mm_vision_tower = vision_tower
         self.config.vision_tower_pretrained = getattr(model_args, "vision_tower_pretrained", "")
+        self.config.vision_tower_processor = getattr(model_args, "vision_tower_processor", "")
 
         if self.get_vision_tower() is None:
             vision_tower = build_vision_tower(model_args)
