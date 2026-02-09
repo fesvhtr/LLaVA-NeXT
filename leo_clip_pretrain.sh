@@ -56,7 +56,7 @@ ACCELERATE_CPU_AFFINITY=1 torchrun --nproc_per_node="${NUM_GPUS}" --nnodes="${NN
     --model_name_or_path ${LLM_VERSION} \
     --version ${PROMPT_VERSION} \
     --data_path /leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-Pretrain/blip_laion_cc_sbu_558k.json \
-    --image_folder /leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-Pretrain/images \
+    --image_folder /leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-Pretrain \
     --vision_tower ${VISION_MODEL_VERSION} \
     --vision_tower_processor ${VISION_TOWER_PROCESSOR} \
     --mm_tunable_parts="mm_mlp_adapter" \
