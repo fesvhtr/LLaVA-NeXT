@@ -13,9 +13,6 @@
 #SBATCH --mem=256G
 
 export OMP_NUM_THREADS=8
-export NCCL_IB_DISABLE=0
-export NCCL_IB_GID_INDEX=3
-export NCCL_SOCKET_IFNAME=eth0
 export NCCL_DEBUG=WARN
 
 set -euo pipefail
@@ -46,7 +43,21 @@ PROMPT_VERSION=plain
 BASE_RUN_NAME="llavanext-${VISION_MODEL_VERSION_CLEAN}-${LLM_VERSION_CLEAN}-mlp2x_gelu-pretrain_blip558k_plain"
 echo "BASE_RUN_NAME: ${BASE_RUN_NAME}"
 
-ACCELERATE_CPU_AFFINITY=1 torchrun --nproc_per_node="${NUM_GPUS}" --nnodes="${NNODES}" --node_rank="${RANK}" --master_addr="${ADDR}" --master_port="${PORT}" \
+MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
+MASTER_PORT=$((29000 + SLURM_JOBID % 1000))
+NUM_WORKERS=8
+
+echo "[INFO] MASTER_ADDR=$MASTER_ADDR MASTER_PORT=$MASTER_PORT"
+echo "[INFO] NUM_MACHINES=$NUM_MACHINES GPUS_PER_NODE=$GPUS_PER_NODE NUM_WORKERS(per process)=$NUM_WORKERS"
+
+LAUNCH_CMD="accelerate launch \
+  --multi_gpu \
+  --mixed_precision=bf16 \
+  --num_machines 8 \
+  --num_processes 32 \
+  --machine_rank \$SLURM_NODEID \
+  --main_process_ip $MASTER_ADDR \
+  --main_process_port $MASTER_PORT \
     llava/train/train_mem.py \
     --deepspeed scripts/zero3.json \
     --model_name_or_path ${LLM_VERSION} \
@@ -80,7 +91,11 @@ ACCELERATE_CPU_AFFINITY=1 torchrun --nproc_per_node="${NUM_GPUS}" --nnodes="${NN
     --dataloader_num_workers 16 \
     --lazy_preprocess True \
     --report_to wandb \
-    --run_name $BASE_RUN_NAME
-    # --attn_implementation sdpa
+    --run_name $BASE_RUN_NAME \
+    --attn_implementation sdpa"
 
+srun --nodes=8 --ntasks-per-node=1 --cpus-per-task=32 \
+    bash -c "$LAUNCH_CMD"
+
+echo "LLaVA-NeXT (multi-node) siglip pretrain completed."
 # You can delete the sdpa attn_implementation if you want to use flash attn
