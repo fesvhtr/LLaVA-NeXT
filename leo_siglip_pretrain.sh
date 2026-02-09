@@ -3,7 +3,7 @@
 #SBATCH --time=24:00:00
 #SBATCH --nodes=8
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=32
 #SBATCH --gres=gpu:4
 #SBATCH --partition=boost_usr_prod
 #SBATCH --qos=normal
@@ -43,6 +43,8 @@ PROMPT_VERSION=plain
 BASE_RUN_NAME="llavanext-${VISION_MODEL_VERSION_CLEAN}-${LLM_VERSION_CLEAN}-mlp2x_gelu-pretrain_blip558k_plain"
 echo "BASE_RUN_NAME: ${BASE_RUN_NAME}"
 
+NUM_MACHINES=8
+GPUS_PER_NODE=4
 MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 MASTER_PORT=$((29000 + SLURM_JOBID % 1000))
 NUM_WORKERS=8
@@ -63,7 +65,7 @@ LAUNCH_CMD="accelerate launch \
     --model_name_or_path ${LLM_VERSION} \
     --version ${PROMPT_VERSION} \
     --data_path /leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-Pretrain/blip_laion_cc_sbu_558k.json \
-    --image_folder /leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-Pretrain/images \
+    --image_folder /leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-Pretrain \
     --vision_tower ${VISION_MODEL_VERSION} \
     --vision_tower_processor ${VISION_TOWER_PROCESSOR} \
     --mm_tunable_parts="mm_mlp_adapter" \
