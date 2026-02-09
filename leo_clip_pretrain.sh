@@ -30,7 +30,7 @@ export TRANSFORMERS_OFFLINE=1
 module load profile/deeplrn
 module load openmpi
 module load cuda/11.8
-source $WORK/fmohamma/venvs/clipr/bin/activate
+source $WORK/fmohamma/venvs/llava_zsc/bin/activate
 cd $WORK/fmohamma/zsc/LLaVA-NeXT
 
 LLM_VERSION="/leonardo_scratch/fast/EUHPC_R04_192/fmohamma/fast_weights/Qwen2-7B-Instruct"
