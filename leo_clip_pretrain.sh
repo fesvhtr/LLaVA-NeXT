@@ -39,7 +39,11 @@ VISION_MODEL_VERSION="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/weights/clip_
 VISION_MODEL_VERSION_CLEAN="clip_r_336_s1"
 VISION_TOWER_PROCESSOR="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/data/clip-vit-large-patch14-336"
 
-
+NUM_GPUS=1
+NNODES=1
+RANK=0
+ADDR="localhost"
+PORT=29500
 ############### Pretrain ################
 
 PROMPT_VERSION=plain
