@@ -34,9 +34,10 @@ source $WORK/fmohamma/venvs/clipr/bin/activate
 cd $WORK/fmohamma/zsc/LLaVA-NeXT
 
 LLM_VERSION="/leonardo_scratch/fast/EUHPC_R04_192/fmohamma/fast_weights/Qwen2-7B-Instruct"
-LLM_VERSION_CLEAN="${LLM_VERSION//\//_}"
-VISION_MODEL_VERSION="/leonardo_scratch/fast/EUHPC_R04_192/fmohamma/fast_weights/Qwen2-7B-Instruct"
-VISION_MODEL_VERSION_CLEAN="${VISION_MODEL_VERSION//\//_}"
+LLM_VERSION_CLEAN="Qwen2-7B-Instruct"
+VISION_MODEL_VERSION="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/weights/siglip_r_s1/run_0201_135251/finetune_weights/checkpoint-1280"
+VISION_MODEL_VERSION_CLEAN="siglip_r_s1"
+VISION_TOWER_PROCESSOR="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/data/siglip-so400m-patch14-384"
 
 ############### Pretrain ################
 
@@ -50,16 +51,17 @@ ACCELERATE_CPU_AFFINITY=1 torchrun --nproc_per_node="${NUM_GPUS}" --nnodes="${NN
     --deepspeed scripts/zero3.json \
     --model_name_or_path ${LLM_VERSION} \
     --version ${PROMPT_VERSION} \
-    --data_path /blip_558k/blip_558k_plain.json \
-    --image_folder /blip_558k/images \
+    --data_path /leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-Pretrain/blip_laion_cc_sbu_558k.json \
+    --image_folder /leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-Pretrain/images \
     --vision_tower ${VISION_MODEL_VERSION} \
+    --vision_tower_processor ${VISION_TOWER_PROCESSOR} \
     --mm_tunable_parts="mm_mlp_adapter" \
     --mm_vision_select_layer -2 \
     --mm_projector_type mlp2x_gelu \
     --mm_use_im_start_end False \
     --mm_use_im_patch_token False \
     --bf16 True \
-    --output_dir /checkpoints/projectors/${BASE_RUN_NAME} \
+    --output_dir $WORK/fmohamma/zsc/LLaVA-NeXT/checkpoints/projectors/${BASE_RUN_NAME} \
     --num_train_epochs 1 \
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 4 \
@@ -78,7 +80,7 @@ ACCELERATE_CPU_AFFINITY=1 torchrun --nproc_per_node="${NUM_GPUS}" --nnodes="${NN
     --dataloader_num_workers 16 \
     --lazy_preprocess True \
     --report_to wandb \
-    --run_name $BASE_RUN_NAME \
-    --attn_implementation sdpa
+    --run_name $BASE_RUN_NAME
+    # --attn_implementation sdpa
 
 # You can delete the sdpa attn_implementation if you want to use flash attn
