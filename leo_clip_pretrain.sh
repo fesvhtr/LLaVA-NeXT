@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=leo_clip_s1_pretrain
+#SBATCH --job-name=llava_leo_clip_s1_pretrain
 #SBATCH --time=24:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
@@ -7,18 +7,20 @@
 #SBATCH --gres=gpu:1
 #SBATCH --partition=boost_usr_prod
 #SBATCH --qos=normal
-#SBATCH --output=leo_clip_s1_pretrain.out
-#SBATCH --error=leo_clip_s1_pretrain.err
+#SBATCH --output=llava_leo_clip_s1_pretrain.out
+#SBATCH --error=llava_leo_clip_s1_pretrain.err
 #SBATCH --account=EUHPC_R04_192
 #SBATCH --mem=256G
 
-export OMP_NUM_THREADS=8
-export NCCL_DEBUG=WARN
-
 set -euo pipefail
 
+export OMP_NUM_THREADS=8
+export NCCL_DEBUG=WARN
 export TOKENIZERS_PARALLELISM=false
+export WANDB_API_KEY=da3ef2608ceaa362d6e40d1d92b4e4e6ebbe9f82
+export WANDB_MODE=offline
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 export HF_HOME="/leonardo_work/EUHPC_R04_192/fmohamma/zsc/hf_cache"
 export HF_DATASETS_OFFLINE=1
 export HF_HUB_OFFLINE=1
