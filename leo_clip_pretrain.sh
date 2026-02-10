@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name=llava_leo_clip_s1_pretrain
 #SBATCH --time=24:00:00
-#SBATCH --nodes=1
+#SBATCH --nodes=2
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=8
-#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task=32
+#SBATCH --gres=gpu:4
 #SBATCH --partition=boost_usr_prod
 #SBATCH --qos=normal
 #SBATCH --output=llava_leo_clip_s1_pretrain.out
@@ -12,14 +12,13 @@
 #SBATCH --account=EUHPC_R04_192
 #SBATCH --mem=256G
 
-set -euo pipefail
-
-export OMP_NUM_THREADS=8
-export NCCL_DEBUG=WARN
 export TOKENIZERS_PARALLELISM=false
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export WANDB_API_KEY=da3ef2608ceaa362d6e40d1d92b4e4e6ebbe9f82
 export WANDB_MODE=offline
-export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+export OMP_NUM_THREADS=8
+export NCCL_DEBUG=WARN
+set -euo pipefail
 
 export HF_HOME="/leonardo_work/EUHPC_R04_192/fmohamma/zsc/hf_cache"
 export HF_DATASETS_OFFLINE=1
@@ -38,11 +37,6 @@ VISION_MODEL_VERSION="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/weights/clip_
 VISION_MODEL_VERSION_CLEAN="clip_r_336_s1"
 VISION_TOWER_PROCESSOR="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/data/clip-vit-large-patch14-336"
 
-NUM_GPUS=1
-NNODES=1
-RANK=0
-ADDR="localhost"
-PORT=29500
 ############### Pretrain ################
 
 PROMPT_VERSION=plain
@@ -50,7 +44,22 @@ PROMPT_VERSION=plain
 BASE_RUN_NAME="llavanext-${VISION_MODEL_VERSION_CLEAN}-${LLM_VERSION_CLEAN}-mlp2x_gelu-pretrain_blip558k_plain"
 echo "BASE_RUN_NAME: ${BASE_RUN_NAME}"
 
-ACCELERATE_CPU_AFFINITY=1 torchrun --nproc_per_node="${NUM_GPUS}" --nnodes="${NNODES}" --node_rank="${RANK}" --master_addr="${ADDR}" --master_port="${PORT}" \
+
+MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
+MASTER_PORT=$((29000 + SLURM_JOBID % 1000))
+NUM_WORKERS=8
+
+echo "[INFO] MASTER_ADDR=$MASTER_ADDR MASTER_PORT=$MASTER_PORT"
+echo "[INFO] NUM_MACHINES=$NUM_MACHINES GPUS_PER_NODE=$GPUS_PER_NODE NUM_WORKERS(per process)=$NUM_WORKERS"
+
+LAUNCH_CMD="accelerate launch \
+  --multi_gpu \
+  --mixed_precision=bf16 \
+  --num_machines 2 \
+  --num_processes 8 \
+  --machine_rank \$SLURM_NODEID \
+  --main_process_ip $MASTER_ADDR \
+  --main_process_port $MASTER_PORT \
     llava/train/train_mem.py \
     --deepspeed scripts/zero3.json \
     --model_name_or_path ${LLM_VERSION} \
@@ -85,6 +94,10 @@ ACCELERATE_CPU_AFFINITY=1 torchrun --nproc_per_node="${NUM_GPUS}" --nnodes="${NN
     --lazy_preprocess True \
     --report_to wandb \
     --run_name $BASE_RUN_NAME \
-    --attn_implementation sdpa
+    --attn_implementation sdpa"
 
+srun --nodes=2 --ntasks-per-node=1 --cpus-per-task=32 \
+    bash -c "$LAUNCH_CMD"
+
+echo "LLaVA-NeXT (multi-node) clip pretrain completed."
 # You can delete the sdpa attn_implementation if you want to use flash attn
