@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=llava_leo_siglip_s2_pretrain
 #SBATCH --time=24:00:00
-#SBATCH --nodes=8
+#SBATCH --nodes=2
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=32
 #SBATCH --gres=gpu:4
@@ -44,8 +44,7 @@ PROMPT_VERSION=plain
 BASE_RUN_NAME="llavanext-${VISION_MODEL_VERSION_CLEAN}-${LLM_VERSION_CLEAN}-mlp2x_gelu-pretrain_blip558k_plain"
 echo "BASE_RUN_NAME: ${BASE_RUN_NAME}"
 
-NUM_MACHINES=8
-GPUS_PER_NODE=4
+
 MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 MASTER_PORT=$((29000 + SLURM_JOBID % 1000))
 NUM_WORKERS=8
@@ -56,8 +55,8 @@ echo "[INFO] NUM_MACHINES=$NUM_MACHINES GPUS_PER_NODE=$GPUS_PER_NODE NUM_WORKERS
 LAUNCH_CMD="accelerate launch \
   --multi_gpu \
   --mixed_precision=bf16 \
-  --num_machines 8 \
-  --num_processes 32 \
+  --num_machines 2 \
+  --num_processes 8 \
   --machine_rank \$SLURM_NODEID \
   --main_process_ip $MASTER_ADDR \
   --main_process_port $MASTER_PORT \
@@ -97,7 +96,7 @@ LAUNCH_CMD="accelerate launch \
     --run_name $BASE_RUN_NAME \
     --attn_implementation sdpa"
 
-srun --nodes=8 --ntasks-per-node=1 --cpus-per-task=32 \
+srun --nodes=2 --ntasks-per-node=1 --cpus-per-task=32 \
     bash -c "$LAUNCH_CMD"
 
 echo "LLaVA-NeXT (multi-node) siglip pretrain completed."
