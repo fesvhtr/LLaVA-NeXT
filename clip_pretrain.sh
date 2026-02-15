@@ -33,7 +33,7 @@ cd $WORK/fmohamma/zsc/LLaVA-NeXT
 
 LLM_VERSION="/leonardo_scratch/fast/EUHPC_R04_192/fmohamma/fast_weights/Qwen2-7B-Instruct"
 LLM_VERSION_CLEAN="Qwen2-7B-Instruct"
-VISION_MODEL_VERSION="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/weights/clip_r_336_s1/run_1215_081150/finetune_weights/checkpoint-1280"
+VISION_MODEL_VERSION="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/data/clip-vit-large-patch14-336"
 # VISION_MODEL_VERSION="fesvhtr/clip-r-336-s1-run1215-1280"
 VISION_MODEL_VERSION_CLEAN="clip_r_336_s1"
 VISION_TOWER_PROCESSOR="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/data/clip-vit-large-patch14-336"
