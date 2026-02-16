@@ -77,7 +77,7 @@ LAUNCH_CMD="accelerate launch \
         --mm_use_im_patch_token False \
         --group_by_modality_length True \
         --image_aspect_ratio anyres \
-        --image_grid_pinpoints "[(336, 672), (672, 336), (672, 672), (1008, 336), (336, 1008)]" \
+        --image_grid_pinpoints \"[(336, 672), (672, 336), (672, 672), (1008, 336), (336, 1008)]\" \
         --mm_patch_merge_type spatial_unpad \
         --bf16 True \
         --run_name $MID_RUN_NAME \
