@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=llava_leo_clip_r_336_s1_ft
+#SBATCH --job-name=llava_leo_clip_ori_ft
 #SBATCH --time=24:00:00
 #SBATCH --nodes=4
 #SBATCH --ntasks-per-node=1
@@ -7,8 +7,8 @@
 #SBATCH --gres=gpu:4
 #SBATCH --partition=boost_usr_prod
 #SBATCH --qos=normal
-#SBATCH --output=llava_leo_clip_r_336_s1_ft.out
-#SBATCH --error=llava_leo_clip_r_336_s1_ft.err
+#SBATCH --output=llava_leo_clip_ori_ft.out
+#SBATCH --error=llava_leo_clip_ori_ft.err
 #SBATCH --account=EUHPC_R04_192
 #SBATCH --mem=256G
 
@@ -33,8 +33,8 @@ cd $WORK/fmohamma/zsc/LLaVA-NeXT
 
 LLM_VERSION="/leonardo_scratch/fast/EUHPC_R04_192/fmohamma/fast_weights/Qwen2-7B-Instruct"
 LLM_VERSION_CLEAN="Qwen2-7B-Instruct"
-VISION_MODEL_VERSION="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/weights/clip_r_336_s1/run_1215_081150/finetune_weights/checkpoint-1280"
-VISION_MODEL_VERSION_CLEAN="clip_r_336_s1"
+VISION_MODEL_VERSION="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/data/clip-vit-large-patch14-336"
+VISION_MODEL_VERSION_CLEAN="clip_336"
 VISION_TOWER_PROCESSOR="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/data/clip-vit-large-patch14-336"
 
 ############### Finetune ################
