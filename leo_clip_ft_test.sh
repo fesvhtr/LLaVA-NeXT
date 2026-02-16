@@ -65,7 +65,7 @@ LAUNCH_CMD="accelerate launch \
         --version ${PROMPT_VERSION} \
         --data_path=/leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-NeXT-Data/llava_next_raw_format/llava_next_raw_format_processed.json \
         --image_folder /leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-NeXT-Data/llava_next_raw_format/images \
-        --pretrain_mm_mlp_adapter=\"checkpoints/projectors/${BASE_RUN_NAME}/mm_projector.bin\" \
+        --pretrain_mm_mlp_adapter=\"/leonardo_work/EUHPC_R04_192/fmohamma/zsc/LLaVA-NeXT/checkpoints/projectors/${BASE_RUN_NAME}/mm_projector.bin\" \
         --mm_tunable_parts=\"mm_vision_tower,mm_mlp_adapter,mm_language_model\" \
         --mm_vision_tower_lr=2e-6 \
         --vision_tower ${VISION_MODEL_VERSION} \
@@ -80,7 +80,7 @@ LAUNCH_CMD="accelerate launch \
         --mm_patch_merge_type spatial_unpad \
         --bf16 True \
         --run_name $MID_RUN_NAME \
-        --output_dir /checkpoints/${MID_RUN_NAME} \
+        --output_dir /leonardo_work/EUHPC_R04_192/fmohamma/zsc/LLaVA-NeXT/checkpoints/${MID_RUN_NAME} \
         --num_train_epochs 1 \
         --per_device_train_batch_size 4 \
         --per_device_eval_batch_size 4 \
