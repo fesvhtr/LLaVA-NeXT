@@ -1,14 +1,14 @@
 #!/bin/bash
-#SBATCH --job-name=llava_leo_siglip_r_s2_ft
+#SBATCH --job-name=llava_leo_clip_r_336_s1_ft
 #SBATCH --time=24:00:00
 #SBATCH --nodes=4
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=32
 #SBATCH --gres=gpu:4
 #SBATCH --partition=boost_usr_prod
-#SBATCH --qos=boost_qos_lprod
-#SBATCH --output=llava_leo_siglip_r_s2_ft.out
-#SBATCH --error=llava_leo_siglip_r_s2_ft.err
+#SBATCH --qos=normal
+#SBATCH --output=llava_leo_clip_r_336_s1_ft.out
+#SBATCH --error=llava_leo_clip_r_336_s1_ft.err
 #SBATCH --account=EUHPC_R04_192
 #SBATCH --mem=256G
 
@@ -33,9 +33,9 @@ cd $WORK/fmohamma/zsc/LLaVA-NeXT
 
 LLM_VERSION="/leonardo_scratch/fast/EUHPC_R04_192/fmohamma/fast_weights/Qwen2-7B-Instruct"
 LLM_VERSION_CLEAN="Qwen2-7B-Instruct"
-VISION_MODEL_VERSION="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/weights/siglip_r_s2/run_0203_195004/finetune_weights/checkpoint-673"
-VISION_MODEL_VERSION_CLEAN="siglip_r_s2"
-VISION_TOWER_PROCESSOR="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/data/siglip-so400m-patch14-384"
+VISION_MODEL_VERSION="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/weights/clip_r_336_s1/run_1215_081150/finetune_weights/checkpoint-1280"
+VISION_MODEL_VERSION_CLEAN="clip_r_336_s1"
+VISION_TOWER_PROCESSOR="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/data/clip-vit-large-patch14-336"
 
 ############### Finetune ################
 PROMPT_VERSION="qwen_1_5"
@@ -63,7 +63,7 @@ LAUNCH_CMD="accelerate launch \
     --main_process_port $MASTER_PORT \
     llava/train/train_mem.py \
         --deepspeed scripts/zero3.json \
-        --model_name_or_path ${CKPT_PATH} \
+        --model_name_or_path ${LLM_VERSION} \
         --version ${PROMPT_VERSION} \
         --data_path=/leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-NeXT-Data/llava_next_raw_format/llava_next_raw_format_processed.json \
         --image_folder /leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-NeXT-Data/llava_next_raw_format/images \
@@ -78,23 +78,23 @@ LAUNCH_CMD="accelerate launch \
         --mm_use_im_patch_token False \
         --group_by_modality_length True \
         --image_aspect_ratio anyres \
-        --image_grid_pinpoints \"[(384, 768), (768, 384), (768, 768), (1152, 384), (384, 1152)]\" \
+        --image_grid_pinpoints \"[(336, 672), (672, 336), (672, 672), (1008, 336), (336, 1008)]\" \
         --mm_patch_merge_type spatial_unpad \
         --bf16 True \
         --run_name $MID_RUN_NAME \
         --output_dir /leonardo_work/EUHPC_R04_192/fmohamma/zsc/LLaVA-NeXT/checkpoints/${MID_RUN_NAME} \
         --num_train_epochs 1 \
         --per_device_train_batch_size 2 \
-        --per_device_eval_batch_size 2 \
+        --per_device_eval_batch_size 4 \
         --gradient_accumulation_steps 2 \
-        --evaluation_strategy "no" \
-        --save_strategy "steps" \
+        --evaluation_strategy no \
+        --save_strategy steps \
         --save_steps 3000 \
         --save_total_limit 1 \
         --learning_rate 1e-5 \
         --weight_decay 0. \
         --warmup_ratio 0.03 \
-        --lr_scheduler_type "cosine" \
+        --lr_scheduler_type cosine \
         --logging_steps 1 \
         --tf32 True \
         --model_max_length 32768 \
@@ -103,12 +103,12 @@ LAUNCH_CMD="accelerate launch \
         --lazy_preprocess True \
         --report_to wandb \
         --torch_compile True \
-        --torch_compile_backend "inductor" \
+        --torch_compile_backend inductor \
         --dataloader_drop_last True \
-        --attn_implementation sdpa
-"
+        --attn_implementation sdpa"
+
 srun --nodes=4 --ntasks-per-node=1 --cpus-per-task=32 \
     bash -c "$LAUNCH_CMD"
 
-echo "LLaVA-NeXT (multi-node) siglip ft completed."
+echo "LLaVA-NeXT (multi-node) clip ft completed."
 # You can delete the sdpa attn_implementation if you want to use flash attn
