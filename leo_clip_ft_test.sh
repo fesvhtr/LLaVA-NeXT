@@ -1,14 +1,14 @@
 #!/bin/bash
-#SBATCH --job-name=llava_leo_clip_r_336_s1_ft
+#SBATCH --job-name=llava_leo_clip_r_336_s1_ft_test
 #SBATCH --time=24:00:00
-#SBATCH --nodes=2
+#SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=32
-#SBATCH --gres=gpu:4
+#SBATCH --cpus-per-task=8
+#SBATCH --gres=gpu:1
 #SBATCH --partition=boost_usr_prod
 #SBATCH --qos=normal
-#SBATCH --output=llava_leo_clip_r_336_s1_ft.out
-#SBATCH --error=llava_leo_clip_r_336_s1_ft.err
+#SBATCH --output=llava_leo_clip_r_336_s1_ft_test.out
+#SBATCH --error=llava_leo_clip_r_336_s1_ft_test.err
 #SBATCH --account=EUHPC_R04_192
 #SBATCH --mem=256G
 
@@ -45,20 +45,18 @@ echo "BASE_RUN_NAME: ${BASE_RUN_NAME}"
 MID_RUN_NAME="llavanext-${VISION_MODEL_VERSION_CLEAN}-${LLM_VERSION_CLEAN}-mlp2x_gelu-ft-llava_1_6"
 echo "MID_RUN_NAME: ${MID_RUN_NAME}"
 
-
-MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
-MASTER_PORT=$((29000 + SLURM_JOBID % 1000))
+MASTER_ADDR="localhost"
+MASTER_PORT=29500
 NUM_WORKERS=8
 
 echo "[INFO] MASTER_ADDR=$MASTER_ADDR MASTER_PORT=$MASTER_PORT"
 echo "[INFO] NUM_WORKERS(per process)=$NUM_WORKERS"
 
 LAUNCH_CMD="accelerate launch \
-    --multi_gpu \
     --mixed_precision=bf16 \
-    --num_machines 2 \
-    --num_processes 8 \
-    --machine_rank \$SLURM_NODEID \
+    --num_machines 1 \
+    --num_processes 1 \
+    --machine_rank 0 \
     --main_process_ip $MASTER_ADDR \
     --main_process_port $MASTER_PORT \
     llava/train/train_mem.py \
@@ -67,8 +65,8 @@ LAUNCH_CMD="accelerate launch \
         --version ${PROMPT_VERSION} \
         --data_path=/leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/llava_1_6.json \
         --image_folder /leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/llava_1_6_images \
-        --pretrain_mm_mlp_adapter="/checkpoints/projectors/${BASE_RUN_NAME}/mm_projector.bin" \
-        --mm_tunable_parts="mm_vision_tower,mm_mlp_adapter,mm_language_model" \
+        --pretrain_mm_mlp_adapter=\"/checkpoints/projectors/${BASE_RUN_NAME}/mm_projector.bin\" \
+        --mm_tunable_parts=\"mm_vision_tower,mm_mlp_adapter,mm_language_model\" \
         --mm_vision_tower_lr=2e-6 \
         --vision_tower ${VISION_MODEL_VERSION} \
         --mm_projector_type mlp2x_gelu \
@@ -106,8 +104,7 @@ LAUNCH_CMD="accelerate launch \
         --dataloader_drop_last True \
         --attn_implementation sdpa"
 
-srun --nodes=2 --ntasks-per-node=1 --cpus-per-task=32 \
+srun --nodes=1 --ntasks-per-node=1 --cpus-per-task=32 \
     bash -c "$LAUNCH_CMD"
 
-echo "LLaVA-NeXT (multi-node) clip ft completed."
-# You can delete the sdpa attn_implementation if you want to use flash attn
+echo "LLaVA-NeXT (single-node single-gpu) clip ft completed."
