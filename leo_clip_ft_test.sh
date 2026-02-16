@@ -63,8 +63,8 @@ LAUNCH_CMD="accelerate launch \
         --deepspeed scripts/zero3.json \
         --model_name_or_path ${LLM_VERSION} \
         --version ${PROMPT_VERSION} \
-        --data_path=/leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/llava_1_6.json \
-        --image_folder /leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/llava_1_6_images \
+        --data_path=/leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-NeXT-Data/llava_next_raw_format/llava_next_raw_format_processed.json \
+        --image_folder /leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-NeXT-Data/llava_next_raw_format/images \
         --pretrain_mm_mlp_adapter=\"checkpoints/projectors/${BASE_RUN_NAME}/mm_projector.bin\" \
         --mm_tunable_parts=\"mm_vision_tower,mm_mlp_adapter,mm_language_model\" \
         --mm_vision_tower_lr=2e-6 \
