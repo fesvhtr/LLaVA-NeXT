@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=llava_leo_siglip_s2_pretrain
+#SBATCH --job-name=llava_leo_siglip_pretrain
 #SBATCH --time=24:00:00
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=1
@@ -7,8 +7,8 @@
 #SBATCH --gres=gpu:4
 #SBATCH --partition=boost_usr_prod
 #SBATCH --qos=normal
-#SBATCH --output=llava_leo_siglip_s2_pretrain.out
-#SBATCH --error=llava_leo_siglip_s2_pretrain.err
+#SBATCH --output=llava_leo_siglip_pretrain.out
+#SBATCH --error=llava_leo_siglip_pretrain.err
 #SBATCH --account=EUHPC_R04_192
 #SBATCH --mem=256G
 
@@ -33,8 +33,8 @@ cd $WORK/fmohamma/zsc/LLaVA-NeXT
 
 LLM_VERSION="/leonardo_scratch/fast/EUHPC_R04_192/fmohamma/fast_weights/Qwen2-7B-Instruct"
 LLM_VERSION_CLEAN="Qwen2-7B-Instruct"
-VISION_MODEL_VERSION="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/weights/siglip_r_s2/run_0203_195004/finetune_weights/checkpoint-673"
-VISION_MODEL_VERSION_CLEAN="siglip_r_s2"
+VISION_MODEL_VERSION="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/data/siglip-so400m-patch14-384"
+VISION_MODEL_VERSION_CLEAN="siglip"
 VISION_TOWER_PROCESSOR="/leonardo_work/EUHPC_R04_192/fmohamma/CLIP-R/data/siglip-so400m-patch14-384"
 
 ############### Pretrain ################
