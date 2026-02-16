@@ -71,6 +71,7 @@ LAUNCH_CMD="accelerate launch \
         --mm_tunable_parts="mm_vision_tower,mm_mlp_adapter,mm_language_model" \
         --mm_vision_tower_lr=2e-6 \
         --vision_tower ${VISION_MODEL_VERSION} \
+        --vision_tower_processor ${VISION_TOWER_PROCESSOR} \
         --mm_projector_type mlp2x_gelu \
         --mm_vision_select_layer -2 \
         --mm_use_im_start_end False \
