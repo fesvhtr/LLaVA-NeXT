@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=llava_leo_clip_r_336_s1_ft
 #SBATCH --time=24:00:00
-#SBATCH --nodes=2
+#SBATCH --nodes=4
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=32
 #SBATCH --gres=gpu:4
@@ -56,8 +56,8 @@ echo "[INFO] NUM_WORKERS(per process)=$NUM_WORKERS"
 LAUNCH_CMD="accelerate launch \
     --multi_gpu \
     --mixed_precision=bf16 \
-    --num_machines 2 \
-    --num_processes 8 \
+    --num_machines 4 \
+    --num_processes 16 \
     --machine_rank \$SLURM_NODEID \
     --main_process_ip $MASTER_ADDR \
     --main_process_port $MASTER_PORT \
@@ -84,9 +84,9 @@ LAUNCH_CMD="accelerate launch \
         --run_name $MID_RUN_NAME \
         --output_dir /leonardo_work/EUHPC_R04_192/fmohamma/zsc/LLaVA-NeXT/checkpoints/${MID_RUN_NAME} \
         --num_train_epochs 1 \
-        --per_device_train_batch_size 4 \
+        --per_device_train_batch_size 2 \
         --per_device_eval_batch_size 4 \
-        --gradient_accumulation_steps 1 \
+        --gradient_accumulation_steps 2 \
         --evaluation_strategy no \
         --save_strategy steps \
         --save_steps 3000 \
@@ -107,7 +107,7 @@ LAUNCH_CMD="accelerate launch \
         --dataloader_drop_last True \
         --attn_implementation sdpa"
 
-srun --nodes=2 --ntasks-per-node=1 --cpus-per-task=32 \
+srun --nodes=4 --ntasks-per-node=1 --cpus-per-task=32 \
     bash -c "$LAUNCH_CMD"
 
 echo "LLaVA-NeXT (multi-node) clip ft completed."

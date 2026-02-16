@@ -53,7 +53,60 @@ NUM_WORKERS=8
 echo "[INFO] MASTER_ADDR=$MASTER_ADDR MASTER_PORT=$MASTER_PORT"
 echo "[INFO] NUM_WORKERS(per process)=$NUM_WORKERS"
 
-LAUNCH_CMD=""
+LAUNCH_CMD="accelerate launch \
+    --multi_gpu \
+    --mixed_precision=bf16 \
+    --num_machines 2 \
+    --num_processes 8 \
+    --machine_rank \$SLURM_NODEID \
+    --main_process_ip $MASTER_ADDR \
+    --main_process_port $MASTER_PORT \
+    llava/train/train_mem.py \
+        --deepspeed scripts/zero3.json \
+        --model_name_or_path ${CKPT_PATH} \
+        --version ${PROMPT_VERSION} \
+        --data_path=/leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-NeXT-Data/llava_next_raw_format/llava_next_raw_format_processed.json \
+        --image_folder /leonardo_scratch/large/userexternal/fmohamma/zsc/llava_data/LLaVA-NeXT-Data/llava_next_raw_format/images \
+        --pretrain_mm_mlp_adapter=\"/leonardo_work/EUHPC_R04_192/fmohamma/zsc/LLaVA-NeXT/checkpoints/projectors/${BASE_RUN_NAME}/mm_projector.bin\" \
+        --mm_tunable_parts="mm_vision_tower,mm_mlp_adapter,mm_language_model" \
+        --mm_vision_tower_lr=2e-6 \
+        --vision_tower ${VISION_MODEL_VERSION} \
+        --vision_tower_processor ${VISION_TOWER_PROCESSOR} \
+        --mm_projector_type mlp2x_gelu \
+        --mm_vision_select_layer -2 \
+        --mm_use_im_start_end False \
+        --mm_use_im_patch_token False \
+        --group_by_modality_length True \
+        --image_aspect_ratio anyres \
+        --image_grid_pinpoints \"[(384, 768), (768, 384), (768, 768), (1152, 384), (384, 1152)]\" \
+        --mm_patch_merge_type spatial_unpad \
+        --bf16 True \
+        --run_name $MID_RUN_NAME \
+        --output_dir /leonardo_work/EUHPC_R04_192/fmohamma/zsc/LLaVA-NeXT/checkpoints/${MID_RUN_NAME} \
+        --num_train_epochs 1 \
+        --per_device_train_batch_size 4 \
+        --per_device_eval_batch_size 4 \
+        --gradient_accumulation_steps 1 \
+        --evaluation_strategy "no" \
+        --save_strategy "steps" \
+        --save_steps 3000 \
+        --save_total_limit 1 \
+        --learning_rate 1e-5 \
+        --weight_decay 0. \
+        --warmup_ratio 0.03 \
+        --lr_scheduler_type "cosine" \
+        --logging_steps 1 \
+        --tf32 True \
+        --model_max_length 32768 \
+        --gradient_checkpointing True \
+        --dataloader_num_workers 16 \
+        --lazy_preprocess True \
+        --report_to wandb \
+        --torch_compile True \
+        --torch_compile_backend "inductor" \
+        --dataloader_drop_last True \
+        --attn_implementation sdpa
+"
 srun --nodes=2 --ntasks-per-node=1 --cpus-per-task=32 \
     bash -c "$LAUNCH_CMD"
 
