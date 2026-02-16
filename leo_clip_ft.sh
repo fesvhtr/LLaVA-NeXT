@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name=llava_leo_clip_r_336_s1_ft
 #SBATCH --time=24:00:00
-#SBATCH --nodes=2
+#SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=32
-#SBATCH --gres=gpu:4
+#SBATCH --cpus-per-task=8
+#SBATCH --gres=gpu:1
 #SBATCH --partition=boost_usr_prod
 #SBATCH --qos=normal
 #SBATCH --output=llava_leo_clip_r_336_s1_ft.out
@@ -56,8 +56,8 @@ echo "[INFO] NUM_WORKERS(per process)=$NUM_WORKERS"
 LAUNCH_CMD="accelerate launch \
     --multi_gpu \
     --mixed_precision=bf16 \
-    --num_machines 2 \
-    --num_processes 8 \
+    --num_machines 1 \
+    --num_processes 1 \
     --machine_rank \$SLURM_NODEID \
     --main_process_ip $MASTER_ADDR \
     --main_process_port $MASTER_PORT \
@@ -106,7 +106,7 @@ LAUNCH_CMD="accelerate launch \
         --dataloader_drop_last True \
         --attn_implementation sdpa"
 
-srun --nodes=2 --ntasks-per-node=1 --cpus-per-task=32 \
+srun --nodes=1 --ntasks-per-node=1 --cpus-per-task=8 \
     bash -c "$LAUNCH_CMD"
 
 echo "LLaVA-NeXT (multi-node) clip ft completed."
