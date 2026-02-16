@@ -104,7 +104,7 @@ LAUNCH_CMD="accelerate launch \
         --dataloader_drop_last True \
         --attn_implementation sdpa"
 
-srun --nodes=1 --ntasks-per-node=1 --cpus-per-task=32 \
+srun --nodes=1 --ntasks-per-node=1 --cpus-per-task=8 \
     bash -c "$LAUNCH_CMD"
 
 echo "LLaVA-NeXT (single-node single-gpu) clip ft completed."
