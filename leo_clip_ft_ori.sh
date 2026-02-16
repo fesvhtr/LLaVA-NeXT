@@ -27,7 +27,7 @@ export TRANSFORMERS_OFFLINE=1
 
 module load profile/deeplrn
 module load openmpi
-module load cuda/11.8
+module load cuda/12.2
 source $WORK/fmohamma/venvs/llava_zsc/bin/activate
 cd $WORK/fmohamma/zsc/LLaVA-NeXT
 
@@ -97,15 +97,14 @@ LAUNCH_CMD="accelerate launch \
         --lr_scheduler_type cosine \
         --logging_steps 1 \
         --tf32 True \
-        --model_max_length 32768 \
+        --model_max_length 8192 \
         --gradient_checkpointing True \
         --dataloader_num_workers 16 \
         --lazy_preprocess True \
         --report_to wandb \
         --torch_compile True \
         --torch_compile_backend inductor \
-        --dataloader_drop_last True \
-        --attn_implementation sdpa"
+        --dataloader_drop_last True"
 
 srun --nodes=4 --ntasks-per-node=1 --cpus-per-task=32 \
     bash -c "$LAUNCH_CMD"

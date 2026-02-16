@@ -27,7 +27,7 @@ export TRANSFORMERS_OFFLINE=1
 
 module load profile/deeplrn
 module load openmpi
-module load cuda/11.8
+module load cuda/12.2
 source $WORK/fmohamma/venvs/llava_zsc/bin/activate
 cd $WORK/fmohamma/zsc/LLaVA-NeXT
 
